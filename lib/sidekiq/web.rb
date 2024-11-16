@@ -32,7 +32,13 @@ module Sidekiq
       "Retries" => "retries",
       "Scheduled" => "scheduled",
       "Dead" => "morgue",
-      "Metrics" => "metrics"
+      "Metrics" => "metrics",
+      "Profiles" => "profiles"
+    }
+
+    PROFILE_OPTIONS = {
+      view_url: "https://profiler.firefox.com/public/%s",
+      store_url: "https://api.profiler.firefox.com/compressed-store"
     }
 
     if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")
@@ -199,7 +205,7 @@ module Sidekiq
       rules = [[:all, {Rack::CACHE_CONTROL => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
 
       ::Rack::Builder.new do
-        use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
+        use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts", "/profile-viewer"],
           root: ASSETS,
           cascade: true,
           header_rules: rules

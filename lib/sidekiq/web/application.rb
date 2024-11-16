@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "base64"
+
 module Sidekiq
   class WebApplication
     extend WebRouter
@@ -348,6 +350,28 @@ module Sidekiq
 
     get "/stats/queues" do
       json Sidekiq::Stats.new.queues
+    end
+
+    get "/profiles" do
+      erb(:profiles)
+    end
+
+    get "/profiles/:key" do
+      key = route_params[:key]
+      @profile = Sidekiq::ProfileSet.new.find(key)
+      halt(404) if @profile.nil?
+
+      erb(:profile)
+    end
+
+    get "/profiles/:key/data" do
+      key = route_params[:key]
+      data = Sidekiq.redis { |c| c.hget(key, "data") }
+
+      [200, {
+        "content-type" => "application/json",
+        "content-encoding" => "gzip"
+      }, [data]]
     end
 
     post "/change_locale" do
