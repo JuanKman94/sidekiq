@@ -1,0 +1,13 @@
+<p>Firefox profiler is contained by an <code>iframe</code> as to not break
+the browser's history navigation.
+<a target="_blank" href="<%= firefox_profiler_url(@profile) %>">Open in new tab</a>.
+</p>
+
+<section class="profiler-container">
+  <iframe
+    style="width: 100%; min-height: 500px;"
+    id="ff_profiler_frame"
+    src="<%= firefox_profiler_url(@profile) %>"
+  >
+  </iframe>
+</section>

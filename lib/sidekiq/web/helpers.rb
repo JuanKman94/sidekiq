@@ -411,5 +411,17 @@ module Sidekiq
         job.add_to_queue
       end
     end
+
+    # This method assumes Firefox Profiler compiled assets are in
+    # <code>profile-viewer</code> path.
+    #
+    # @return profile_record [ProfileRecord]
+    def firefox_profiler_url(profile_record)
+      [
+        root_path,
+        "profile-viewer/index.html?sidekiq-profile=",
+        CGI.escape_uri_component("#{root_path}profiles/#{CGI.escape(profile_record.key)}/data")
+      ].join("")
+    end
   end
 end

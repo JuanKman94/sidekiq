@@ -1239,6 +1239,8 @@ module Sidekiq
   Workers = WorkSet
 
   class ProfileSet
+    FETCH_KEYS = %w[started_at jid type token].freeze
+
     def initialize
       @records = Sidekiq.redis do |c|
         c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
@@ -1251,16 +1253,24 @@ module Sidekiq
     end
 
     def each(&block)
-      fetch_keys = %w[started_at jid type token].freeze
       arrays = Sidekiq.redis do |c|
         c.pipelined do |p|
           @records.each do |key|
-            p.hmget(key, *fetch_keys)
+            p.hmget(key, *FETCH_KEYS)
           end
         end
       end
 
       arrays.compact.map { |arr| ProfileRecord.new(arr) }.each(&block)
+    end
+
+    # @return [ProfileRecord, nil]
+    def find(key)
+      Sidekiq.redis do |conn|
+        attrs = conn.hmget(key, *FETCH_KEYS).compact
+
+        return ProfileRecord.new(attrs) if !attrs.empty?
+      end
     end
   end
 
